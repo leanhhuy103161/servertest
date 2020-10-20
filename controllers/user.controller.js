@@ -1,0 +1,37 @@
+var db = require('../db');
+var shortId = require('shortid');
+
+module.exports.getIndex = function(req, res) {
+	res.render('users/index', {
+		users : db.get('users').value()
+	});
+}
+
+module.exports.postCreate = function (req, res) {
+	req.body.id = shortId.generate();
+	console.log(res.locals)
+	db.get('users').push(req.body).write();
+	res.redirect('/users');
+}
+
+module.exports.getCreate = function (req, res) {
+	res.render('users/create');
+}
+
+module.exports.getSearch = function(req, res) {
+	var q = req.query.q
+	var matchedUsers = db.get('users').value().filter(function (user) {
+		return user.name.toLowerCase().indexOf(q.toLowerCase()) !== -1;
+	})
+	res.render('users/index', {
+		users : matchedUsers
+	});
+}
+
+module.exports.getId = function (req, res) {
+	var id = req.params.id;
+	var user = db.get('users').find({id : id}).value();
+	res.render('users/view', {
+		user : user
+	})
+}
